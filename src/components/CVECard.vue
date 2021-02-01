@@ -1,27 +1,61 @@
 <template>
-  <q-timeline-entry
-    :title="content._source['vulnerability.id']"
-    :subtitle="content._source['publish_date']"
-    color="red"
-    icon="mdi-bug"
-  >
-    <div class="cve-desc">
-      {{ content._source['vulnerability.description'] }}
+  <div class="nvd-timeline">
+    <div class="timeline-pages">
+      <q-pagination
+        style="margin-left: -8px;" unelevated dense color="red"
+        rounded v-model="currentPage" :max="totalPages" :max-pages="5">
+      </q-pagination>
     </div>
-    <div class="rss-tags q-mt-md">
-      <q-chip v-for="(tag, index) in content._source.tags" size="sm" v-bind:key="index" icon="mdi-pin">{{tag}}</q-chip>
+    <div class="timeline-content">
+      <q-timeline>
+        <q-timeline-entry
+          :title="content._source['vulnerability.id']"
+          :subtitle="content._source['publish_date']"
+          color="red"
+          icon="mdi-bug"
+          v-for="(content, index) in results.results" v-bind:key="`cve-${index}`"
+          >
+          <div class="cve-desc">
+            {{ content._source['vulnerability.description'] }}
+          </div>
+          <div class="rss-tags q-mt-md">
+            <q-chip v-for="(tag, index) in content._source.tags" size="sm" v-bind:key="index" icon="mdi-pin">{{tag}}</q-chip>
+          </div>
+        </q-timeline-entry>
+      </q-timeline>
     </div>
-  </q-timeline-entry>
+  </div>
 </template>
 
 <script>
 export default {
   name: 'CVECard',
-  props: ['content'],
+  props: ['results'],
   data () {
     return {
       ok: ''
     }
+  },
+  computed: {
+    currentPage: {
+      get: function () {
+        return Math.floor(this.results.start / this.results.limit) + 1
+      },
+      set: function (input) {
+        this.$emit('changePage', this.results, input)
+      }
+    },
+    totalPages: {
+      get: function () {
+        return Math.ceil(this.results.total / this.results.limit)
+      }
+    }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.timeline-content {
+  margin-top: 10px;
+}
+</style>

@@ -5,7 +5,7 @@
         <q-toolbar-title>StreamIO</q-toolbar-title>
       </q-toolbar>
       <q-toolbar class="col-6">
-        <q-form @submit="getAll">
+        <q-form @submit="getAllResults">
           <q-input borderless bg-color="white" v-model="searchQuery" label="Search" style='width: 100%'>
             <template v-slot:prepend>
               <q-icon name="search" />
@@ -14,11 +14,11 @@
         </q-form>
       </q-toolbar>
       <q-toolbar class="col-2">
-        <q-input v-model="startDate" mask="date" :rules="['date']" class="date-input">
+        <q-input v-model="startDate" :rules="['date']" class="date-input" @change="jemoeder()">
           <template v-slot:append>
             <q-icon name="event" class="cursor-pointer">
               <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                <q-date v-model="startDate">
+                <q-date v-model="startDate" mask="YYYY-MM-DD">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Close" color="primary" flat />
                   </div>
@@ -29,11 +29,11 @@
         </q-input>
       </q-toolbar>
       <q-toolbar class="col-2">
-        <q-input v-model="endDate" mask="date" :rules="['date']" class="date-input">
+        <q-input v-model="endDate" :rules="['date']" class="date-input">
           <template v-slot:append>
             <q-icon name="event" class="cursor-pointer">
               <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                <q-date v-model="endDate">
+                <q-date v-model="endDate" mask="YYYY-MM-DD">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Close" color="primary" flat />
                   </div>
@@ -44,41 +44,32 @@
         </q-input>
       </q-toolbar>
     </div>
+    <div class="row">
+      <div class="col">
+        <topics-treemap :results="treemapResults" v-if="treemapResults"></topics-treemap>
+      </div>
+    </div>
     <div class="row q-pa-md content">
       <div class="col-2">
-        <q-list>
-          <q-item v-for="(values, agg) in aggregationResults" v-bind:key="agg">
-            <!-- <q-item-label header>{{agg}}</q-item-label> -->
-            <q-item-section side>
-              <q-radio v-model="shape" :val="val.key" :label="val.key" v-for="(val, row) in values" v-bind:key="row">
-                <!-- {{val}} {{row}}
-                {{agg}} -->
-              </q-radio>
-
-              <!-- <q-option-group dense
-                v-model="availableFilters.cveId.group"
-                :options="availableFilters.cveId.options"
-                type="checkbox"
-              /> -->
-            </q-item-section>
-          </q-item>
-        </q-list>
+          <q-list style="max-width: 350px">
+            <q-item-label header>Sources</q-item-label>
+              <q-item>
+                <q-item-section>
+                  <q-option-group @input="getAllResults()"
+                    :options="availableColumns"
+                    label="Notifications"
+                    type="checkbox"
+                    v-model="selectedColumns"
+                  />
+                </q-item-section>
+              </q-item>
+          </q-list>
       </div>
       <div class="col">
         <div class="row">
-          <div class="col-4">
-            <q-timeline color="secondary" >
-              <component :content="result" v-bind:is="componentMapping[result._source['event.provider']]" v-for="(result, index) in nvdResults" v-bind:key="index"/>
-            </q-timeline>
-          </div>
-          <div class="col-4">
-            <q-timeline color="secondary" >
-              <component :content="result" v-bind:is="componentMapping[result._source['event.provider']]" v-for="(result, index) in rssResults" v-bind:key="index"/>
-            </q-timeline>
-          </div>
-          <div class="col-4">
-            <q-timeline color="secondary" >
-              <component :content="result" v-bind:is="componentMapping[result._source['event.provider']]" v-for="(result, index) in twitterResults" v-bind:key="index"/>
+          <div class="col" v-for="(results, column) in searchResults" v-bind:key="column">
+            <q-timeline color="secondary">
+              <component :results="results" v-bind:is="componentMapping[column]" v-on:changePage="changedPage"></component>
             </q-timeline>
           </div>
         </div>
@@ -89,6 +80,7 @@
 
 <script>
 import { DateTime } from 'luxon'
+import TopicsTreemap from 'src/components/TopicsTreemap.vue'
 import CVECard from '../components/CVECard.vue'
 import TweetCard from '../components/TweetCard.vue'
 import RssCard from '../components/RssCard.vue'
@@ -99,7 +91,8 @@ export default {
   components: {
     CVECard,
     TweetCard,
-    RssCard
+    RssCard,
+    TopicsTreemap
   },
   data () {
     return {
@@ -107,25 +100,36 @@ export default {
       searchStart: 0,
       searchLimit: 20,
       searchFilters: {},
+      selectedColumns: ['NVD', 'rss', 'twitter'],
+      availableColumns: [
+        {
+          label: 'NVD',
+          value: 'NVD'
+        },
+        {
+          label: 'RSS',
+          value: 'rss'
+        },
+        {
+          label: 'Tweets',
+          value: 'twitter'
+        }
+      ],
+      searchResults: {
+      },
       searchAggs: {
-        // 'event.provider': {
-        //   type: 'terms',
-        //   size: 20
-        // }
-        // 'rss.source': {
-        //   type: 'terms',
-        //   size: 20
-        // },
-        // 'vulnerability.id': {
-        //   type: 'terms',
-        //   size: 20
-        // }
+        'rss.source': {
+          type: 'terms',
+          size: 20
+        },
+        'vulnerability.id': {
+          type: 'terms',
+          size: 20
+        }
       },
       shape: null,
-      twitterResults: [],
-      nvdResults: [],
-      rssResults: [],
-      otherResults: [],
+      histogramResults: null,
+      treemapResults: null,
       aggregationResults: {},
       searchExclude: [
         {
@@ -137,13 +141,12 @@ export default {
           term: 'impacted'
         }
       ],
-      searchResults: [],
       componentMapping: {
         NVD: 'CVECard',
         rss: 'RssCard',
         twitter: 'TweetCard'
       },
-      startDate: DateTime.local().minus({ days: 30 }).toISODate(),
+      startDate: DateTime.local().minus({ days: 7 }).toISODate(),
       endDate: DateTime.local().toISODate()
     }
   },
@@ -153,66 +156,96 @@ export default {
     }
   },
   mounted () {
-    this.getAll()
+    this.getAllResults()
   },
   methods: {
-    getAll () {
-      // this.runSearch(this.runSearchSuccess)
-      this.getTweets()
-      this.getRss()
-      this.getNvd()
+    changedPage (column, newpage) {
+      const newStart = (newpage - 1) * column.limit
+      this.runSearch([column.column], newStart)
     },
-    getTweets () {
-      this.twitterResults = []
-      this.searchFilters = { 'event.provider': { term: 'twitter' } }
-      this.runSearch(this.runSearchSuccess)
+    getAllResults () {
+      for (var column of Object.keys(this.searchResults)) {
+        this.$delete(this.searchResults, column)
+      }
+      this.runSearch(this.selectedColumns)
+      this.getTree()
     },
-    getRss () {
-      this.rssResults = []
-      this.searchFilters = { 'event.provider': { term: 'rss' } }
-      this.runSearch(this.runSearchSuccess)
-    },
-    getNvd () {
-      this.nvdResults = []
-      this.searchFilters = { 'event.provider': { term: 'NVD' } }
-      this.runSearch(this.runSearchSuccess)
-    },
-    runSearch (callback) {
-      const postData = {
+    getTree () {
+      var postData = {
         query: this.searchQuery,
-        start: this.searchStart,
-        limit: this.searchLimit,
-        aggregations: this.searchAggs,
-        filters: this.searchFilters,
+        start: 0,
+        column: 'treemap',
+        limit: 0,
+        aggregations: {
+          tags: {
+            type: 'terms',
+            count: 20
+          }
+        },
+        filters: {
+          ...this.searchFilters
+        },
         exclude: this.searchExclude
       }
       this.$axios
-        .post('/search', postData)
-        .then(response => callback(response.data))
+        .post('/search', [postData])
+        .then(response => this.getTreeSuccess(response.data))
+    },
+    getTreeSuccess (response) {
+      this.treemapResults = response[0]
+    },
+    // runHistogram () {
+    //   var postData = {
+    //     query: this.searchQuery,
+    //     start: this.searchStart,
+    //     limit: this.searchLimit,
+    //     filters: this.searchFilters,
+    //     field: 'tags',
+    //     exclude: this.searchExclude
+    //   }
+    //   this.$axios
+    //     .post('/histogram', postData)
+    //     .then(response => this.runHistogramSuccess(response.data))
+    // },
+    // runHistogramSuccess (results) {
+    //   this.histogramResults = results
+    // },
+    runSearch (columns, start = 0, limit = 30) {
+      var searchQueries = []
+      columns.forEach(column => {
+        var postData = {
+          query: this.searchQuery,
+          start: start,
+          column: column,
+          limit: limit,
+          // aggregations: this.searchAggs,
+          filters: {
+            ...this.searchFilters,
+            'event.provider': { term: column }
+          },
+          exclude: this.searchExclude
+        }
+        searchQueries.push(postData)
+      })
+      this.$axios
+        .post('/search', searchQueries)
+        .then(response => this.runSearchSuccess(response.data))
     },
     runSearchSuccess (response) {
-      response.results.forEach(element => {
-        switch (element._source['event.provider']) {
-          case 'twitter':
-            this.twitterResults.push(element)
-            break
-          case 'rss':
-            this.rssResults.push(element)
-            break
-          case 'NVD':
-            this.nvdResults.push(element)
-            break
-          default:
-            this.otherResults.push(element)
-        }
+      response.forEach(results => {
+        this.$set(this.searchResults, results.column, results)
       })
-      this.aggregationResults = response.aggregations
     }
   }
 }
 </script>
 
 <style lang="scss">
+.trendingchart {
+  margin-top: 100px;
+  width: 100%;
+  height: 200px;
+}
 
 .top-header {
   background-color: white;

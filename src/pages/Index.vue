@@ -11,11 +11,6 @@
         </q-form>
       </div>
     </div>
-    <div class="row flex-center">
-      <div class="col-12">
-        <trending-topics class="trendingchart"></trending-topics>
-      </div>
-    </div>
     <div class="bg-tip">
       <p>Photo by <a :href="unsplashUserProfile">{{selectedBackground.user.name }}</a> on <a :href="unsplashHome">Unsplash</a></p>
     </div>
@@ -23,10 +18,10 @@
 </template>
 
 <script>
-import TrendingTopics from 'src/components/TrendingTopics.vue'
 
 export default {
-  components: { TrendingTopics },
+  components: {
+  },
   name: 'PageIndex',
   data () {
     return {
@@ -99,12 +94,6 @@ export default {
 .search-index {
   margin-top: 200px;
   height: 100px;
-}
-
-.trendingchart {
-  margin-top: 100px;
-  width: 100%;
-  height: 300px;
 }
 
 .bg-tip {
