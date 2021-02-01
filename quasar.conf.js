@@ -11,7 +11,9 @@ module.exports = function (/* ctx */) {
   return {
     supportTS: false,
     boot: [
-      'axios'
+      'axios',
+      'filters',
+      'apex'
     ],
     css: [
       'app.scss'
