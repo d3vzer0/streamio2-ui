@@ -44,9 +44,9 @@ export default {
         },
         grid: {
           padding: {
-            top: -20,
+            top: -25,
             left: 0,
-            right: -20
+            right: -25
           }
         }
       }

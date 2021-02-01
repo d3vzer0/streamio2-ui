@@ -2,10 +2,13 @@
   <q-page>
     <div class="row no-wrap shadow-1 top-header">
       <q-toolbar class="col-2">
-        <q-toolbar-title>StreamIO</q-toolbar-title>
+        <q-avatar>
+          <img src="/VulnLaneBets.png">
+        </q-avatar>
+        <q-toolbar-title>vulnstreetbets</q-toolbar-title>
       </q-toolbar>
       <q-toolbar class="col-6">
-        <q-form @submit="getAllResults">
+        <q-form @submit="getAllResults" style="width: 100%;">
           <q-input borderless bg-color="white" v-model="searchQuery" label="Search" style='width: 100%'>
             <template v-slot:prepend>
               <q-icon name="search" />
@@ -52,7 +55,7 @@
     <div class="row q-pa-md content">
       <div class="col-2">
           <q-list style="max-width: 350px">
-            <q-item-label header>Sources</q-item-label>
+            <q-item-label header>Stonk Exchange</q-item-label>
               <q-item>
                 <q-item-section>
                   <q-option-group @input="getAllResults()"
@@ -103,15 +106,15 @@ export default {
       selectedColumns: ['NVD', 'rss', 'twitter'],
       availableColumns: [
         {
-          label: 'NVD',
+          label: 'NVD NeXT',
           value: 'NVD'
         },
         {
-          label: 'RSS',
+          label: 'RSS Traders BV.',
           value: 'rss'
         },
         {
-          label: 'Tweets',
+          label: 'Twitter Securities Inc.',
           value: 'twitter'
         }
       ],
