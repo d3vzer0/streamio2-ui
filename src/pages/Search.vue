@@ -17,11 +17,11 @@
         </q-form>
       </q-toolbar>
       <q-toolbar class="col-2">
-        <q-input v-model="startDate" :rules="['date']" class="date-input" @change="jemoeder()">
+        <q-input v-model="startDate" class="date-input">
           <template v-slot:append>
             <q-icon name="event" class="cursor-pointer">
               <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                <q-date v-model="startDate" mask="YYYY-MM-DD">
+                <q-date v-model="startDate" mask="YYYY-MM-DD" @input="getAllResults">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Close" color="primary" flat />
                   </div>
@@ -32,11 +32,11 @@
         </q-input>
       </q-toolbar>
       <q-toolbar class="col-2">
-        <q-input v-model="endDate" :rules="['date']" class="date-input">
+        <q-input v-model="endDate" class="date-input">
           <template v-slot:append>
             <q-icon name="event" class="cursor-pointer">
               <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                <q-date v-model="endDate" mask="YYYY-MM-DD">
+                <q-date v-model="endDate" mask="YYYY-MM-DD" @input="getAllResults">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Close" color="primary" flat />
                   </div>
@@ -149,7 +149,7 @@ export default {
         rss: 'RssCard',
         twitter: 'TweetCard'
       },
-      startDate: DateTime.local().minus({ days: 7 }).toISODate(),
+      startDate: DateTime.local().minus({ days: 3 }).toISODate(),
       endDate: DateTime.local().toISODate()
     }
   },
