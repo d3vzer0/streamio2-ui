@@ -18,13 +18,15 @@ RUN quasar build
 # via nginx service
 FROM nginx:1.13.12-alpine as production-stage
 
-# Copy entrypoint
-COPY entrypoint.sh /usr/local/bin/
-RUN ln -s /usr/local/bin/entrypoint.sh
-
 COPY --from=build-stage /app/dist/spa/ /usr/share/nginx/html
 COPY ./default.conf /etc/nginx/conf.d/default.conf
+
+# Copy entrypoint
+WORKDIR /opt/vulnstreetbets
+COPY entrypoint.sh . 
+RUN chmod +x entrypoint.sh 
+
 EXPOSE 80
 
-ENTRYPOINT [ "entrypoint.sh" ]
+ENTRYPOINT [ "./entrypoint.sh" ]
 CMD ["nginx", "-g", "daemon off;"]
