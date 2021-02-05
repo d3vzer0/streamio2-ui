@@ -66,9 +66,9 @@ module.exports = function (/* ctx */) {
       workboxPluginMode: 'GenerateSW',
       workboxOptions: {},
       manifest: {
-        name: 'StreamIO',
-        short_name: 'StreamIO',
-        description: 'Search engine for StreamIO',
+        name: 'vulnstreetbets',
+        short_name: 'vulnstreetbets',
+        description: 'Search engine and trend analysis for vulnerabilities',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
