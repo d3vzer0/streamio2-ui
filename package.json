@@ -1,8 +1,8 @@
 {
-  "name": "streamio2-ui",
+  "name": "vulnstreetbets",
   "version": "0.0.1",
-  "description": "Search engine for StreamIO",
-  "productName": "StreamIO2",
+  "description": "Search engine and trend analysis for vulnerabilities",
+  "productName": "vulnstreetbets",
   "author": "Joey Dreijer <jdreijer@d3vzer0.com>",
   "private": true,
   "scripts": {
