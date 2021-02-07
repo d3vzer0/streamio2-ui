@@ -54,19 +54,19 @@
     </div>
     <div class="row q-pa-md content">
       <div class="col-2">
-          <q-list style="max-width: 350px">
-            <q-item-label header>Stonk Exchange</q-item-label>
-              <q-item>
-                <q-item-section>
-                  <q-option-group @input="getAllResults()"
-                    :options="availableColumns"
-                    label="Notifications"
-                    type="checkbox"
-                    v-model="selectedColumns"
-                  />
-                </q-item-section>
-              </q-item>
-          </q-list>
+        <q-list style="max-width: 350px">
+          <q-item-label header>Stonk Exchange</q-item-label>
+            <q-item>
+              <q-item-section>
+                <q-option-group @input="getAllResults()"
+                  :options="availableColumns"
+                  type="checkbox"
+                  v-model="selectedColumns"
+                />
+              </q-item-section>
+            </q-item>
+        </q-list>
+        <filter-component v-on:changeSelection="changeFilter" :name="agg" :results="values" v-for="(values, agg) in aggregationResults" v-bind:key="agg"></filter-component>
       </div>
       <div class="col">
         <div class="row">
@@ -84,6 +84,7 @@
 <script>
 import { DateTime } from 'luxon'
 import TopicsTreemap from 'src/components/TopicsTreemap.vue'
+import FilterComponent from 'src/components/FilterComponent.vue'
 import CVECard from '../components/CVECard.vue'
 import TweetCard from '../components/TweetCard.vue'
 import RssCard from '../components/RssCard.vue'
@@ -94,6 +95,7 @@ export default {
   components: {
     CVECard,
     TweetCard,
+    FilterComponent,
     RssCard,
     TopicsTreemap
   },
@@ -104,6 +106,7 @@ export default {
       searchLimit: 20,
       searchFilters: {},
       selectedColumnsStore: ['NVD', 'rss', 'twitter'],
+      selectedFiltersStore: {},
       availableColumns: [
         {
           label: 'NVD NeXT',
@@ -130,8 +133,6 @@ export default {
           size: 20
         }
       },
-      shape: null,
-      histogramResults: null,
       treemapResults: null,
       aggregationResults: {},
       searchExclude: [
@@ -175,6 +176,14 @@ export default {
     this.getAllResults()
   },
   methods: {
+    changeFilter (agg, values) {
+      var formattedFilters = []
+      values.forEach(value => {
+        formattedFilters.push({ term: value })
+      })
+      this.searchFilters[agg] = formattedFilters
+      this.getAllResults()
+    },
     changedPage (column, newpage) {
       const newStart = (newpage - 1) * column.limit
       this.runSearch([column.column], newStart)
@@ -208,8 +217,10 @@ export default {
         .then(response => this.getTreeSuccess(response.data))
     },
     getTreeSuccess (response) {
-      this.treemapResults = []
       this.treemapResults = response[0]
+      for (const [key, value] of Object.entries(response[0].aggregations)) {
+        this.aggregationResults[key] = value
+      }
     },
     runSearch (columns, start = 0, limit = 30) {
       var searchQueries = []
@@ -219,7 +230,6 @@ export default {
           start: start,
           column: column,
           limit: limit,
-          // aggregations: this.searchAggs,
           filters: {
             ...this.searchFilters,
             'event.provider': [{ term: column }]
@@ -258,7 +268,6 @@ export default {
 
 body{
   background-color: rgb(249, 249, 249);
-
 }
 
 </style>

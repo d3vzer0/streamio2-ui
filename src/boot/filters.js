@@ -7,3 +7,8 @@ Vue.filter('truncate', function (text, length, suffix) {
     return text
   }
 })
+
+Vue.filter('upper', function (text) {
+  text = text.toString()
+  return text.charAt(0).toUpperCase() + text.slice(1)
+})
