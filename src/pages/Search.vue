@@ -103,7 +103,7 @@ export default {
       searchStart: 0,
       searchLimit: 20,
       searchFilters: {},
-      selectedColumns: ['NVD', 'rss', 'twitter'],
+      selectedColumnsStore: ['NVD', 'rss', 'twitter'],
       availableColumns: [
         {
           label: 'NVD NeXT',
@@ -156,6 +156,19 @@ export default {
   computed: {
     currentDate () {
       return DateTime.local()
+    },
+    selectedColumns: {
+      get () {
+        return this.selectedColumnsStore
+      },
+      set (columns) {
+        this.selectedColumnsStore = columns
+        var columnFilters = []
+        columns.forEach(column => {
+          columnFilters.push({ term: column })
+        })
+        this.searchFilters['event.provider'] = columnFilters
+      }
     }
   },
   mounted () {
@@ -195,24 +208,9 @@ export default {
         .then(response => this.getTreeSuccess(response.data))
     },
     getTreeSuccess (response) {
+      this.treemapResults = []
       this.treemapResults = response[0]
     },
-    // runHistogram () {
-    //   var postData = {
-    //     query: this.searchQuery,
-    //     start: this.searchStart,
-    //     limit: this.searchLimit,
-    //     filters: this.searchFilters,
-    //     field: 'tags',
-    //     exclude: this.searchExclude
-    //   }
-    //   this.$axios
-    //     .post('/histogram', postData)
-    //     .then(response => this.runHistogramSuccess(response.data))
-    // },
-    // runHistogramSuccess (results) {
-    //   this.histogramResults = results
-    // },
     runSearch (columns, start = 0, limit = 30) {
       var searchQueries = []
       columns.forEach(column => {
@@ -224,7 +222,7 @@ export default {
           // aggregations: this.searchAggs,
           filters: {
             ...this.searchFilters,
-            'event.provider': { term: column }
+            'event.provider': [{ term: column }]
           },
           exclude: this.searchExclude
         }

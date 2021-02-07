@@ -1,5 +1,5 @@
 <template>
-  <apexchart type="treemap" height="200" :options="chartOptions" :series="series"></apexchart>
+  <apexchart v-if="series.length" type="treemap" height="200" :options="chartOptions" :series="series"></apexchart>
 </template>
 
 <script>
@@ -8,7 +8,7 @@ export default {
   props: ['results'],
   data () {
     return {
-      series: this.parsedData(),
+      series: [],
       chartOptions: {
         colors: [
           '#3B93A5',
@@ -52,17 +52,25 @@ export default {
       }
     }
   },
+  mounted () {
+    this.parsedData(this.results)
+  },
+  watch: {
+    results: function (newVal, oldVal) {
+      this.parsedData(newVal)
+    }
+  },
   methods: {
-    parsedData: function () {
+    parsedData: function (results) {
       var datasets = []
-      const histogramData = this.results.aggregations.tags
+      const histogramData = results.aggregations.tags
       histogramData.forEach(element => {
         datasets.push({
           x: element.key,
           y: element.doc_count
         })
       })
-      return [{ data: datasets }]
+      this.series = [{ data: datasets }]
     }
   }
 }
