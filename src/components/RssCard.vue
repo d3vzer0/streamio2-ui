@@ -21,9 +21,6 @@
           <div class="rss-tags q-mt-md">
             <q-chip v-for="(tag, index) in content._source.tags" size="sm" v-bind:key="index" icon="mdi-pin">{{tag | truncate(20, '...') }}</q-chip>
           </div>
-          <div class="rss-tags">
-            <q-chip v-for="(tag, index) in content._source.tags" size="sm" v-bind:key="index" icon="mdi-pin">{{tag | truncate(20, '...') }}</q-chip>
-          </div>
         </q-timeline-entry>
       </q-timeline>
     </div>
