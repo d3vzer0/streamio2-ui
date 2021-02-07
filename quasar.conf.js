@@ -13,7 +13,8 @@ module.exports = function (/* ctx */) {
     boot: [
       'axios',
       'filters',
-      'apex'
+      'apex',
+      'markdown'
     ],
     css: [
       'app.scss'
