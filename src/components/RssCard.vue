@@ -6,7 +6,8 @@
           <div class="text-h6"> {{ dialogContent._source['rss.title'] }}</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          <q-markdown>{{ sanitizeContent(dialogContent._source['rss.content']) }}</q-markdown>
+          <div v-html="sanitizeContent(dialogContent._source['rss.content'])"></div>
+          <!-- <q-markdown>{{ sanitizeContent(dialogContent._source['rss.content']) }}</q-markdown> -->
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="OK" color="primary" v-close-popup />
@@ -33,8 +34,10 @@
           <div class="rss-title">
             {{content._source['rss.title']}}
             <br/><br/>
-            <q-btn size="xs" @click="showDialog = true, dialogContent = content" color="orange"
-             unelevated text-color="white">Read more</q-btn>
+            <!-- <q-btn size="xs" @click="showDialog = true, dialogContent = content" color="orange"
+             unelevated text-color="white">Read more</q-btn> -->
+            <q-btn size="xs" color="orange" unelevated text-color="white"><a :href="content._source['rss.url']"><q-icon name="link"/> Read more</a></q-btn>
+             <!-- {{  -->
           </div>
           <div class="rss-tags q-mt-md">
             <q-chip v-for="(tag, index) in content._source.tags" size="sm" v-bind:key="index" icon="mdi-pin">{{tag | truncate(20, '...') }}</q-chip>
@@ -48,7 +51,8 @@
 
 <script>
 import sanitizeHtml from 'sanitize-html'
-import TurndownService from 'turndown'
+// import TurndownService from 'turndown'
+// import { tables, gfm } from 'turndown-plugin-gfm'
 
 export default {
   name: 'RSSCard',
@@ -61,8 +65,16 @@ export default {
   },
   methods: {
     sanitizeContent (content) {
-      const turndownService = new TurndownService({ headingStyle: 'atx' })
-      return turndownService.turndown(sanitizeHtml(content))
+      // const turndownService = new TurndownService({ headingStyle: 'atx' })
+      // turndownService.use(gfm)
+      // turndownService.use(tables)
+      // return turndownService.turndown(sanitizeHtml(content))
+      return sanitizeHtml(content, {
+        transformTags: {
+          h1: 'h5',
+          h2: 'h6'
+        }
+      })
     }
   },
   computed: {
@@ -89,5 +101,9 @@ export default {
 }
 .btn-fixed-width {
   width: 90px;
+}
+a {
+  color: inherit; /* blue colors for links too */
+  text-decoration: inherit; /* no underline */
 }
 </style>

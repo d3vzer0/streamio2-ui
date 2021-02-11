@@ -7,7 +7,7 @@
         </q-avatar>
         <q-toolbar-title>vulnstreetbets</q-toolbar-title>
       </q-toolbar>
-      <q-toolbar class="col-6">
+      <q-toolbar class="col-xl-6 col-lg-6 col-md-4">
         <q-form @submit="getAllResults" style="width: 100%;">
           <q-input borderless bg-color="white" v-model="searchQuery" label="Search" style='width: 100%'>
             <template v-slot:prepend>
@@ -52,28 +52,30 @@
         <topics-treemap :results="treemapResults" v-if="treemapResults"></topics-treemap>
       </div>
     </div>
-    <div class="row q-pa-md content">
+    <div class="row content">
       <div class="col-2">
-        <q-list style="max-width: 350px">
-          <q-item-label header>Stonk Exchange</q-item-label>
-            <q-item>
-              <q-item-section>
-                <q-option-group @input="getAllResults()"
-                  :options="availableColumns"
-                  type="checkbox"
-                  v-model="selectedColumns"
-                />
-              </q-item-section>
-            </q-item>
-        </q-list>
+        <q-card>
+          <q-list style="max-width: 350px">
+            <q-item-label header>Stonk Exchange</q-item-label>
+              <q-item>
+                <q-item-section>
+                  <q-option-group @input="getAllResults()"
+                    :options="availableColumns"
+                    type="checkbox"
+                    v-model="selectedColumns"
+                  />
+                </q-item-section>
+              </q-item>
+          </q-list>
         <filter-component v-on:changeSelection="changeFilter" :name="agg" :results="values" v-for="(values, agg) in aggregationResults" v-bind:key="agg"></filter-component>
+        </q-card>
       </div>
-      <div class="col">
-        <div class="row">
+      <div class="col q-ml-sm">
+        <div class="row q-col-gutter-sm">
           <div class="col" v-for="(results, column) in searchResults" v-bind:key="column">
-            <q-timeline color="secondary">
+            <q-card class="q-pa-md resultcards">
               <component :results="results" v-bind:is="componentMapping[column]" v-on:changePage="changedPage"></component>
-            </q-timeline>
+            </q-card>
           </div>
         </div>
       </div>
@@ -266,8 +268,11 @@ export default {
   padding-bottom: 0px;
 }
 
-body{
+body {
   background-color: rgb(249, 249, 249);
+  .resultcards {
+    word-break: break-all;
+  }
 }
 
 </style>
